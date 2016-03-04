@@ -25,23 +25,15 @@
 
 const Rx = require('rx');
 
-const logOutput = observable => observable.forEach(
-  (x)   => console.log('Next: ' + JSON.stringify(x)),
-  (err) => console.log('Error: ' + err),
-  ()    => console.log('Completed')
-);
+/*
+ * Comments
+ */
 
 const commentSaga = source => {
   const sink = new Rx.Subject();
-
-  source.forEach(action => {
-    sink.onNext({
-      type: action.type + '.Processed'
-    });
-  });
-
+  source.forEach(action => sink.onNext({type: action.type + '.Processed'}));
   return sink;
-}
+};
 
 const commentsSaga = actions$ => {
   // Output subject for this saga.
@@ -157,6 +149,10 @@ const commentsSaga = actions$ => {
   return sink;
 };
 
+/*
+ * Generate demo input actions$
+ */
+
 var actions$ = Rx.Observable.merge(
   // Fetch some comments from the API.
   Rx.Observable.timer(100)
@@ -191,6 +187,16 @@ var actions$ = Rx.Observable.merge(
       type: 'Created',
       payload: {id: 3}
     }))
+);
+
+/*
+ * Print what is going out of the action stream.
+ */
+
+const logOutput = observable => observable.forEach(
+  (x)   => console.log('Next: ' + JSON.stringify(x)),
+  (err) => console.log('Error: ' + err),
+  ()    => console.log('Completed')
 );
 
 logOutput(commentsSaga(actions$));

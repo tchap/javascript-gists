@@ -6,10 +6,48 @@ const logOutput = observable => observable.forEach(
   ()    => console.log('Completed')
 );
 
+/*
+const storyEditSaga = (actions$, id) => Rx.Observable.merge(
+  actions$
+    .filter({ action, payload } => action.type === 'EditRequested')
+    .do({ payload } => console.log('EDIT START', payload.story.id)),
+  actions$
+    .filter({ action } => action.type === 'EditCancelled')
+    .do({ payload } => console.log('EDIT STOP', payload.story.id))
+);
+*/
+
+const storiesSaga = actions$ => {
+  // This is basically a router that needs to understand how storySaga works
+  // so that it can forward actions properly.
+  
+  subjects = [];
+
+  const editRe = /\[([0-9]+)\][.]Edit/;
+
+  // Handle story fetching.
+
+
+  // Handle the edit event.
+  return actions$
+    .filter(action => action.type.match(editRe))
+    .forEach(action => {
+      const index = parseInt(editRe.exec(action.type), 10);
+      subjects.forEach((subject, i) => {
+        if (i === index) {
+          subject.onNext({type: 'Edit'});
+        } else {
+          subject.onNext({type: 'EditCancelled'});
+        }
+      });
+    });
+};
+
 var actions$ = Rx.Observable.timer(0, 1000)
   .timeInterval()
   .map(x => ({
-    action: `Stories[${x.value % 3}].Edit`,
+    type: `[${x.value % 3}].Edit`,
   }));
 
-logOutput(actions$);
+
+logOutput(storiesSaga(actions$));

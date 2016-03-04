@@ -21,35 +21,37 @@ const storiesSaga = actions$ => {
   // This is basically a router that needs to understand how storySaga works
   // so that it can forward actions properly.
   
-  subjects = [];
+  const outputSubject = new Rx.Subject();
 
-  const editRe = /\[([0-9]+)\][.]Edit/;
+  let storySubjects = [];
 
-  // Handle story fetching.
+  // Handle 'Fetched'
   actions$
     .filter(action => action.type === 'Fetched')
     .forEach(action => {
       const stories = action.payload.stories;
 
       // Get rid of the old subjects.
-      subjects.forEach(subject => subject.dispose());
+      storySubjects.forEach(subject => subject.dispose());
 
       // Create new subjects.
-      subjects = stories.map(() => storySaga(new Rx.Subject()));
+      storySubjects = stories.map(() => storySaga(new Rx.Subject()));
 
       // Send 'Inserted' all at once.
-      stories.forEach((story, i) => subjects[i].onNext({
+      stories.forEach((story, i) => storySubjects[i].onNext({
         type: 'Inserted',
         payload: story
       }));
     });
 
-  // Handle the edit event.
-  return actions$
+  // Handle '[].Edit'
+  const editRe = /\[([0-9]+)\][.]Edit/;
+
+  actions$
     .filter(action => action.type.match(editRe))
     .forEach(action => {
       const index = parseInt(editRe.exec(action.type), 10);
-      subjects.forEach((subject, i) => {
+      storySubjects.forEach((subject, i) => {
         if (i === index) {
           subject.onNext({type: 'Edit'});
         } else {
@@ -57,6 +59,8 @@ const storiesSaga = actions$ => {
         }
       });
     });
+
+  return outputSubject;
 };
 
 var actions$ = Rx.Observable.timer(0, 1000)

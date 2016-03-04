@@ -9,7 +9,7 @@ const logOutput = observable => observable.forEach(
 );
 
 const storySaga = subject => {
-  subject.forEach(action => console.log(`${action.type} ${action.payload.id}`));
+  subject.forEach(action => console.log(`story ${action.payload.id}: ${action.type}`));
   return subject;
 }
 
@@ -31,7 +31,7 @@ const storiesSaga = actions$ => {
       storySubjects.forEach(subject => subject.dispose());
 
       // Create new subjects.
-      storySubjects = stories.map(() => storySaga(new Rx.Subject()))
+      storySubjects = stories.map(() => storySaga(new Rx.Subject()));
 
       // Send 'Inserted' all at once.
       stories.forEach((story, i) => storySubjects[i].onNext({
@@ -63,7 +63,8 @@ const storiesSaga = actions$ => {
     });
 
   // Merge the streams.
-  return output$;
+  return output$
+    .do(action => console.log('Output: ', action.type))
 };
 
 var actions$ = Rx.Observable.merge(

@@ -8,11 +8,10 @@
  * Next: {"type":"[1].Fetched.Processed"}
  * Next: {"type":"[2].Fetched.Processed"}
  * Next: {"type":"[1].Edited.Processed"}
- * Next: {"type":"[3].Fetched.Processed"}
  * Next: {"type":"[0].EditRequested.Processed"}
  * Next: {"type":"[1].EditCancelled.Processed"}
  * Next: {"type":"[2].EditCancelled.Processed"}
- * Next: {"type":"[3].EditCancelled.Processed"}
+ * Next: {"type":"[3].Fetched.Processed"}
  * Next: {"type":"[0].EditCancelled.Processed"}
  * Next: {"type":"[1].EditRequested.Processed"}
  * Next: {"type":"[2].EditCancelled.Processed"}
@@ -175,12 +174,6 @@ var actions$ = Rx.Observable.merge(
       type: 'Edited',
       payload: {id: 1}
     })),
-  // Mimic a push notification that a comment has been added.
-  Rx.Observable.timer(300)
-    .map(() => ({
-      type: 'Created',
-      payload: {id: 3}
-    })),
   // Request comment edit periodically.
   Rx.Observable.interval(500)
     .timeInterval()
@@ -191,7 +184,13 @@ var actions$ = Rx.Observable.merge(
         type: `[${id}].EditRequested`,
         payload: {id: id}
       };
-    })
+    }),
+  // Mimic a push notification that a comment has been added.
+  Rx.Observable.timer(1000)
+    .map(() => ({
+      type: 'Created',
+      payload: {id: 3}
+    }))
 );
 
 logOutput(commentsSaga(actions$));

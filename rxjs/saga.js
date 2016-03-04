@@ -4,27 +4,23 @@
  * OUTPUT:
  *
  * $ node saga.js 
- * Next: {"type":"[0].Inserted.Processed"}
- * Next: {"type":"[1].Inserted.Processed"}
- * Next: {"type":"[2].Inserted.Processed"}
+ * Next: {"type":"[0].Fetched.Processed"}
+ * Next: {"type":"[1].Fetched.Processed"}
+ * Next: {"type":"[2].Fetched.Processed"}
+ * Next: {"type":"[1].Edited.Processed"}
+ * Next: {"type":"[3].Fetched.Processed"}
  * Next: {"type":"[0].EditRequested.Processed"}
  * Next: {"type":"[1].EditCancelled.Processed"}
  * Next: {"type":"[2].EditCancelled.Processed"}
+ * Next: {"type":"[3].EditCancelled.Processed"}
  * Next: {"type":"[0].EditCancelled.Processed"}
  * Next: {"type":"[1].EditRequested.Processed"}
  * Next: {"type":"[2].EditCancelled.Processed"}
+ * Next: {"type":"[3].EditCancelled.Processed"}
  * Next: {"type":"[0].EditCancelled.Processed"}
  * Next: {"type":"[1].EditCancelled.Processed"}
  * Next: {"type":"[2].EditRequested.Processed"}
- * Next: {"type":"[0].EditRequested.Processed"}
- * Next: {"type":"[1].EditCancelled.Processed"}
- * Next: {"type":"[2].EditCancelled.Processed"}
- * Next: {"type":"[0].EditCancelled.Processed"}
- * Next: {"type":"[1].EditRequested.Processed"}
- * Next: {"type":"[2].EditCancelled.Processed"}
- * Next: {"type":"[0].EditCancelled.Processed"}
- * Next: {"type":"[1].EditCancelled.Processed"}
- * Next: {"type":"[2].EditRequested.Processed"}
+ * Next: {"type":"[3].EditCancelled.Processed"}
  * ...
  */
 

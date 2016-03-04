@@ -13,7 +13,7 @@ const storiesSaga = actions$ => {
   // This is basically a router that needs to understand how storySaga works
   // so that it can forward actions properly.
   
-  const outputSubject = new Rx.Subject();
+  const output$ = new Rx.Subject();
 
   let storySubjects = [];
 
@@ -52,14 +52,23 @@ const storiesSaga = actions$ => {
       });
     });
 
-  return outputSubject;
+  return output$;
 };
 
-var actions$ = Rx.Observable.timer(0, 1000)
-  .timeInterval()
-  .map(x => ({
-    type: `[${x.value % 3}].Edit`,
-  }));
-
+var actions$ = Rx.Observable.merge(
+  Rx.Observable.of({
+    type: 'Fetched',
+    payload: [
+      {id: 123},
+      {id: 234},
+      {id: 345}
+    ]
+  }),
+  Rx.Observable.interval(500)
+    .timeInterval()
+    .map(x => ({
+      type: `[${x.value % 3}].Edit`,
+    }))
+);
 
 logOutput(storiesSaga(actions$));

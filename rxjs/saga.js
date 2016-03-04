@@ -53,7 +53,7 @@ const commentsSaga = actions$ => {
 
       // Dispatch comment-specific 'Fetched'.
       composer.elements.forEach((comment, i) =>
-        composer.onNext(i, {
+        composer.dispatchTo(i, {
           type: 'Fetched',
           payload: comment
         })
@@ -68,7 +68,7 @@ const commentsSaga = actions$ => {
     .filter(action => action.type === 'Edited')
     .forEach(action => {
       const id = action.payload.id;
-      composer.onNext(element => element.id === id, action);
+      composer.dispatchTo(element => element.id === id, action);
     });
 
   /*
@@ -82,7 +82,7 @@ const commentsSaga = actions$ => {
       composer.pushElement(action.payload);
 
       // Dispatch comment-specific 'Fetched'.
-      composer.onNext(element => element.id === id, {
+      composer.dispatchTo(element => element.id === id, {
         type: 'Fetched',
         payload: action.payload
       });
@@ -105,12 +105,12 @@ const commentsSaga = actions$ => {
       // dispatch 'EditCancelled' for all other comments.
       composer.elements.forEach((element, i) => {
         if (i === index) {
-          composer.onNext(i, {
+          composer.dispatchTo(i, {
             type: 'EditRequested',
             payload: action.payload
           });
         } else {
-          composer.onNext(i, {
+          composer.dispatchTo(i, {
             type: 'EditCancelled',
             payload: action.payload
           });

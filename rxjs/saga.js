@@ -6,16 +6,8 @@ const logOutput = observable => observable.forEach(
   ()    => console.log('Completed')
 );
 
-/*
-const storyEditSaga = (actions$, id) => Rx.Observable.merge(
-  actions$
-    .filter({ action, payload } => action.type === 'EditRequested')
-    .do({ payload } => console.log('EDIT START', payload.story.id)),
-  actions$
-    .filter({ action } => action.type === 'EditCancelled')
-    .do({ payload } => console.log('EDIT STOP', payload.story.id))
-);
-*/
+const storyEditSaga = actions$ => actions$
+  .forEach(action => console.log(`${action.type} ${action.payload.story.id}`));
 
 const storiesSaga = actions$ => {
   // This is basically a router that needs to understand how storySaga works

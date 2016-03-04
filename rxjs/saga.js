@@ -18,7 +18,7 @@ const storiesSaga = actions$ => {
   let storySubjects = [];
 
   // Handle 'Fetched'
-  actions$
+  const fetch$ = actions$
     .filter(action => action.type === 'Fetched')
     .forEach(action => {
       const stories = action.payload.stories;
@@ -36,23 +36,28 @@ const storiesSaga = actions$ => {
       }));
     });
 
-  // Handle '[].Edit'
-  const editRe = /\[([0-9]+)\][.]Edit/;
+  // Handle '[].EditRequested'
+  const editRe = /\[([0-9]+)\][.]EditRequested/;
 
-  actions$
+  const edit$ = actions$
     .filter(action => action.type.match(editRe))
     .forEach(action => {
       const index = parseInt(editRe.exec(action.type), 10);
       storySubjects.forEach((subject, i) => {
         if (i === index) {
-          subject.onNext({type: 'Edit'});
+          subject.onNext({type: 'EditRequested'});
         } else {
           subject.onNext({type: 'EditCancelled'});
         }
       });
     });
 
-  return output$;
+  // Merge the streams.
+  return Rx.Observable.merge(
+    actions$,
+    fetch$,
+    edit$
+  );
 };
 
 var actions$ = Rx.Observable.merge(

@@ -36,11 +36,8 @@ const commentSaga = source => {
 };
 
 const commentsSaga = actions$ => {
-  // Output subject for this saga.
-  const sink = new Rx.Subject();
-
-  // Subjects associated with the comments in the list.
-  let subjects = [];
+  // Instantiate a router.
+  const composer = new SagaUtils.ListComposer();
 
   /*
    * Handle 'Fetched'
@@ -51,30 +48,16 @@ const commentsSaga = actions$ => {
     .forEach(action => {
       const comments = action.payload;
 
-      // Clean up the old comment subjects.
-      subjects.forEach(subject => subject.dispose());
-
-      // Create new comment subjects, connect their sinks to the saga output subject.
-      subjects = comments.map((comment, i) => {
-        const input = new Rx.Subject();
-        const output = commentSaga(input);
-
-        // This is where the wrapping is happening.
-        output.forEach(action => sink.onNext({
-          type: `[${i}].${action.type}`,
-          payload: action.payload
-        }));
-
-        return input;
-      });
+      // Replace old comments.
+      composer.setElements(comments);
 
       // Dispatch comment-specific 'Fetched'.
-      comments.forEach((comment, i) => {
-        subjects[i].onNext({
+      composer.elements.forEach((comment, i) =>
+        composer.onNext(i, {
           type: 'Fetched',
           payload: comment
-        });
-      });
+        })
+      );
     });
 
   /*
@@ -84,8 +67,8 @@ const commentsSaga = actions$ => {
   actions$
     .filter(action => action.type === 'Edited')
     .forEach(action => {
-      // To keep things simple, the comment ID is the same as its local index.
-      subjects[action.payload.id].onNext(action);
+      const id = action.payload.id;
+      composer.onNext(element => element.id === id, action);
     });
 
   /*
@@ -95,21 +78,11 @@ const commentsSaga = actions$ => {
   actions$
     .filter(action => action.type === 'Created')
     .forEach(action => {
-      // To keep things simple, the comment ID is the same as its local index.
-      // There is no 'Created' action for a comment, we send 'Fetched'.
-      const id = action.payload.id;
-      const input = new Rx.Subject();
-      const output = commentSaga(input);
+      // Register the comment with the composer.
+      composer.pushElement(action.payload);
 
-      // This is where the wrapping is happening.
-      output.forEach(action => sink.onNext({
-        type: `[${id}].${action.type}`,
-        payload: action.payload
-      }));
-
-      subjects.push(input);
-
-      input.onNext({
+      // Dispatch comment-specific 'Fetched'.
+      composer.onNext(element => element.id === id, {
         type: 'Fetched',
         payload: action.payload
       });
@@ -130,14 +103,14 @@ const commentsSaga = actions$ => {
       // Go through the list of comments,
       // dispatch 'EditRequested' for the selected comment,
       // dispatch 'EditCancelled' for all other comments.
-      subjects.forEach((subject, i) => {
+      composer.elements.forEach((element, i) => {
         if (i === index) {
-          subject.onNext({
+          composer.onNext(i, {
             type: 'EditRequested',
             payload: action.payload
           });
         } else {
-          subject.onNext({
+          composer.onNext(i, {
             type: 'EditCancelled',
             payload: action.payload
           });
@@ -145,8 +118,8 @@ const commentsSaga = actions$ => {
       });
     });
 
-  // Return the saga output.
-  return sink;
+  // Return the output.
+  return composer.sink;
 };
 
 /*

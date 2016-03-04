@@ -1,5 +1,57 @@
 'use strict';
 
+/*
+ * EXPECTED OUTPUT:
+ *
+ * $ node saga.js 
+ * Next: {"type":"[0].Inserted.Processed"}
+ * Next: {"type":"[1].Inserted.Processed"}
+ * Next: {"type":"[2].Inserted.Processed"}
+ * Next: {"type":"[0].EditRequested.Processed"}
+ * Next: {"type":"[1].EditCancelled.Processed"}
+ * Next: {"type":"[2].EditCancelled.Processed"}
+ * Next: {"type":"[0].EditCancelled.Processed"}
+ * Next: {"type":"[1].EditRequested.Processed"}
+ * Next: {"type":"[2].EditCancelled.Processed"}
+ * Next: {"type":"[0].EditCancelled.Processed"}
+ * Next: {"type":"[1].EditCancelled.Processed"}
+ * Next: {"type":"[2].EditRequested.Processed"}
+ * Next: {"type":"[0].EditRequested.Processed"}
+ * Next: {"type":"[1].EditCancelled.Processed"}
+ * Next: {"type":"[2].EditCancelled.Processed"}
+ * Next: {"type":"[0].EditCancelled.Processed"}
+ * Next: {"type":"[1].EditRequested.Processed"}
+ * Next: {"type":"[2].EditCancelled.Processed"}
+ * Next: {"type":"[0].EditCancelled.Processed"}
+ * Next: {"type":"[1].EditCancelled.Processed"}
+ * Next: {"type":"[2].EditRequested.Processed"}
+ * ...
+ * (CTRL+C)
+ *
+ * CURRENT OUTPUT:
+ * $ node saga.js 
+ * Next: {"type":"[0].EditRequested.Processed"}
+ * Next: {"type":"[1].EditCancelled.Processed"}
+ * Next: {"type":"[2].EditCancelled.Processed"}
+ * Next: {"type":"[0].EditCancelled.Processed"}
+ * Next: {"type":"[1].EditRequested.Processed"}
+ * Next: {"type":"[2].EditCancelled.Processed"}
+ * Next: {"type":"[0].EditCancelled.Processed"}
+ * Next: {"type":"[1].EditCancelled.Processed"}
+ * Next: {"type":"[2].EditRequested.Processed"}
+ * Next: {"type":"[0].EditRequested.Processed"}
+ * Next: {"type":"[1].EditCancelled.Processed"}
+ * Next: {"type":"[2].EditCancelled.Processed"}
+ * Next: {"type":"[0].EditCancelled.Processed"}
+ * Next: {"type":"[1].EditRequested.Processed"}
+ * Next: {"type":"[2].EditCancelled.Processed"}
+ * Next: {"type":"[0].EditCancelled.Processed"}
+ * Next: {"type":"[1].EditCancelled.Processed"}
+ * Next: {"type":"[2].EditRequested.Processed"}
+ * ...
+ * (CTRL+C)
+ */
+
 const Rx = require('rx');
 
 const logOutput = observable => observable.forEach(
@@ -41,18 +93,22 @@ const storiesSaga = actions$ => {
       storySubjects = stories.map((story, i) => {
         const input = new Rx.Subject();
         const output = storySaga(input);
+
         output.forEach(action => outputSB.onNext({
           type: `[${i}].${action.type}`,
           payload: action.payload
         }));
+
         return input;
       });
 
       // Send 'Inserted' all at once.
-      stories.forEach((story, i) => storySubjects[i].onNext({
-        type: 'Inserted',
-        payload: story
-      }));
+      stories.forEach((story, i) => {
+        storySubjects[i].onNext({
+          type: 'Inserted',
+          payload: story
+        });
+      });
     });
 
   // Handle '[].EditRequested'

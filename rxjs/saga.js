@@ -26,7 +26,23 @@ const storiesSaga = actions$ => {
   const editRe = /\[([0-9]+)\][.]Edit/;
 
   // Handle story fetching.
+  actions$
+    .filter(action => action.type === 'Fetched')
+    .forEach(action => {
+      const stories = action.payload.stories;
 
+      // Get rid of the old subjects.
+      subjects.forEach(subject => subject.dispose());
+
+      // Create new subjects.
+      subjects = stories.map(() => storySaga(new Rx.Subject()));
+
+      // Send 'Inserted' all at once.
+      stories.forEach((story, i) => subjects[i].onNext({
+        type: 'Inserted',
+        payload: story
+      }));
+    });
 
   // Handle the edit event.
   return actions$

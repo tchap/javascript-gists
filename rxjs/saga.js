@@ -29,6 +29,7 @@
  * (CTRL+C)
  *
  * CURRENT OUTPUT:
+ *
  * $ node saga.js 
  * Next: {"type":"[0].EditRequested.Processed"}
  * Next: {"type":"[1].EditCancelled.Processed"}

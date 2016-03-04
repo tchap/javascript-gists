@@ -8,16 +8,23 @@ const logOutput = observable => observable.forEach(
   ()    => console.log('Completed')
 );
 
-const storySaga = subject => {
-  subject.forEach(action => console.log(`story ${action.payload.id}: ${action.type}`));
-  return subject;
+const storySaga = inputSB => {
+  const outputSB = new Rx.Subject();
+
+  inputSB.forEach(action => {
+    outputSB.onNext({
+      type: action.type + '.Processed'
+    });
+  });
+
+  return outputSB;
 }
 
 const storiesSaga = actions$ => {
   // This is basically a router that needs to understand how storySaga works
   // so that it can forward actions properly.
   
-  const output$ = new Rx.Subject();
+  const outputSB = new Rx.Subject();
 
   let storySubjects = [];
 
@@ -30,8 +37,16 @@ const storiesSaga = actions$ => {
       // Get rid of the old subjects.
       storySubjects.forEach(subject => subject.dispose());
 
-      // Create new subjects.
-      storySubjects = stories.map(() => storySaga(new Rx.Subject()));
+      // Create new subjects and merge into output$.
+      storySubjects = stories.map((story, i) => {
+        const input = new Rx.Subject();
+        const output = storySaga(input);
+        output.forEach(action => outputSB.onNext({
+          type: `[${i}].${action.type}`,
+          payload: action.payload
+        }));
+        return input;
+      });
 
       // Send 'Inserted' all at once.
       stories.forEach((story, i) => storySubjects[i].onNext({
@@ -63,8 +78,7 @@ const storiesSaga = actions$ => {
     });
 
   // Merge the streams.
-  return output$
-    .do(action => console.log('Output: ', action.type))
+  return outputSB;
 };
 
 var actions$ = Rx.Observable.merge(

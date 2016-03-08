@@ -5,6 +5,24 @@ const Rx = require('rx');
 const _  = require('lodash');
 
 
+class ObjectDispatcher {
+  
+  constructor(object, saga) {
+    this._object = object;
+
+    this._source = new Rx.Subject();
+    this._sink = saga(source);
+  }
+
+  get sink() {
+    return this._sink;
+  }
+
+  dispatch(action) {
+    this._source.onNext(action);
+  }
+}
+
 class ListComposer {
 
   constructor(saga) {
@@ -77,4 +95,9 @@ class ListComposer {
   }
 }
 
-exports.ListComposer = ListComposer;
+
+function buildComposer(object, saga) {
+
+}
+
+exports.buildComposer = buildComposer;

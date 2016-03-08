@@ -83,6 +83,7 @@ const commentsSaga = actions$ => {
       composer.pushElement(action.payload);
 
       // Dispatch comment-specific 'Fetched'.
+      const id = action.payload.id;
       composer.dispatchTo(element => element.id === id, {
         type: 'Fetched',
         payload: action.payload

@@ -5,7 +5,7 @@ const Rx = require('rx');
 const _  = require('lodash');
 
 
-class ListComposer() {
+class ListComposer {
 
   constructor(saga) {
     this._saga = saga;
@@ -23,29 +23,41 @@ class ListComposer() {
   }
 
   setElements(elements) {
-    this._sources.forEach(subject => subject.dispose());
-    this._sources = elements.map((_, i) => ::this.newSource(i));
+    this._sources.forEach(source => source.dispose());
+    this._sources = elements.map((_, i) => this._newSource(i));
     this._elements = elements.slice(0);
   }
 
   pushElement(element) {
-    this._sources.push(this.newSource(this._sources.length));
+    this._sources.push(this._newSource(this._sources.length));
     this._elements.push(element);
   }
 
-  dispatchTo(selector, action, elseAction) {
+  dispatch(action) {
+    const pattern = /^\[([0-9]+)\][.](.+)$/;
+    const match = pattern.exec(action.type);
+    const index = match[1];
+    const type = match[2];
+
+    this._sources[index].onNext({
+      type: type,
+      payload: action.payload
+    });
+  }
+
+  dispatchTo(selector, action) {
     if (_.isInteger(selector)) {
-      selector = (_, index) => index === selector;
+      this._sources[selector].onNext(action);
+      return;
     }
 
     if (_.isFunction(selector)) {
       this._elements.forEach((value, index, array) => {
         if (selector(value, index, array)) {
           this._sources[index].onNext(action);
-        } else if (elseAction) {
-          this._sources[index].onNext(elseAction);
         }
       });
+      return;
     }
 
     throw new Error(`unknown selector type: ${typeof selector}`);
@@ -64,3 +76,5 @@ class ListComposer() {
     return source; 
   }
 }
+
+exports.ListComposer = ListComposer;

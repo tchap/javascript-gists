@@ -23,7 +23,8 @@
  * ...
  */
 
-const Rx = require('rx');
+const Rx        = require('rx');
+const SagaUtils = require('./sagaUtils');
 
 /*
  * Comments
@@ -37,7 +38,7 @@ const commentSaga = source => {
 
 const commentsSaga = actions$ => {
   // Instantiate a router.
-  const composer = new SagaUtils.ListComposer();
+  const composer = new SagaUtils.ListComposer(commentSaga);
 
   /*
    * Handle 'Fetched'
@@ -138,9 +139,6 @@ var actions$ = Rx.Observable.merge(
         {id: 3, parentId: 2}
       ]
     })),
-);
-
-/*
   // Mimic a push notification that a comment has been edited.
   Rx.Observable.timer(200)
     .map(() => ({
@@ -164,7 +162,7 @@ var actions$ = Rx.Observable.merge(
       type: 'Created',
       payload: {id: 3}
     }))
-*/
+);
 
 /*
  * Print what is going out of the action stream.

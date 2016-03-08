@@ -134,9 +134,13 @@ var actions$ = Rx.Observable.merge(
       payload: [
         {id: 0},
         {id: 1},
-        {id: 2}
+        {id: 2},
+        {id: 3, parentId: 2}
       ]
     })),
+);
+
+/*
   // Mimic a push notification that a comment has been edited.
   Rx.Observable.timer(200)
     .map(() => ({
@@ -160,7 +164,7 @@ var actions$ = Rx.Observable.merge(
       type: 'Created',
       payload: {id: 3}
     }))
-);
+*/
 
 /*
  * Print what is going out of the action stream.
